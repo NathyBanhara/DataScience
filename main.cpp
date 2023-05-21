@@ -25,7 +25,7 @@ int main()
     for (const auto& row : result) {
         std::cout << "Valor da coluna 1: " << row[0].as<int>() << std::endl;
         std::cout << "Valor da coluna 2: " << row[1].as<int>() << std::endl;
-        cout << "Valor da coluna 3: " << row[2].as<int>() << endl;
+        std::cout << "Valor da coluna 3: " << row[2].as<int>() << std::endl;
     }
 
     // Fecha a conexão com o banco de dados
