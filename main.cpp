@@ -5,6 +5,7 @@
 #include <fstream>
 #include "json.hpp"
 #include "queue.hpp"
+#include "graph.hpp"
 #include "sax_event_consumer.hpp"
 
 using json = nlohmann::json;
@@ -30,6 +31,13 @@ int main()
 
     printf("\n");
 
+    Graph g = Graph();
+
+	while (q.front()->name != "end_object")
+		g.getAtt(q.front()->name, q.front()->type, " ", q);
+
+    g.printGraph();
+
     // Cria uma conexão com o banco de dados
     pqxx::connection conn("dbname=science user=postgres password=postgres hostaddr=127.0.0.1 port=5432");
 
@@ -39,18 +47,6 @@ int main()
     } else {
         std::cout << "Erro ao conectar ao banco de dados." << std::endl;
         return 1;
-    }
-
-    // Executa uma consulta no banco de dados
-    pqxx::work txn(conn);
-    pqxx::result result = txn.exec("SELECT * FROM data_science_II");
-    txn.commit();
-
-    // Itera sobre os resultados
-    for (const auto& row : result) {
-        std::cout << "Valor da coluna 1: " << row[0].as<int>() << std::endl;
-        std::cout << "Valor da coluna 2: " << row[1].as<int>() << std::endl;
-        std::cout << "Valor da coluna 3: " << row[2].as<int>() << std::endl;
     }
 
     // Fecha a conexão com o banco de dados

@@ -48,6 +48,7 @@ bool sax_event_consumer::start_object(std::size_t elements)
 
 bool sax_event_consumer::end_object()
 {
+    this->queue.push(queue.createStruct("end_object", ""));
     return true;
 }
 
