@@ -1,10 +1,35 @@
 #include <pqxx/pqxx>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+#include "json.hpp"
+#include "queue.hpp"
+#include "sax_event_consumer.hpp"
 
-using namespace std;
+using json = nlohmann::json;
 
 int main()
 {
+    std::ifstream text("database.json");
+
+    // create a SAX event consumer object
+    sax_event_consumer sec;
+
+    // parse JSON
+    bool resultJson = json::sax_parse(text, &sec);
+    
+    // output the result of sax_parse
+    std::cout << "\nresult: " << std::boolalpha << resultJson << "\n";
+
+    printf("\n");
+
+    Queue q = sec.queue;
+
+    q.printQueue();
+
+    printf("\n");
+
     // Cria uma conexão com o banco de dados
     pqxx::connection conn("dbname=science user=postgres password=postgres hostaddr=127.0.0.1 port=5432");
 
