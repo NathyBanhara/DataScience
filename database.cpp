@@ -1,3 +1,24 @@
+#include <iostream>
+#include <iostream>
+#include <pqxx/pqxx>
+#include "graph.hpp"
+
+using namespace std;
+
+int connectDatabase()
+{
+    pqxx::connection conn("dbname=science user=postgres password=postgres hostaddr=127.0.0.1 port=5432");
+
+    // Verifica se a conexão foi estabelecida com sucesso
+    if (conn.is_open()) {
+        std::cout << "Conexão bem-sucedida!" << std::endl;
+        return 1;
+    } else {
+        std::cout << "Erro ao conectar ao banco de dados." << std::endl;
+        return 0;
+    }
+}
+
 /*// Executa uma consulta no banco de dados
     pqxx::work txn(conn);
     pqxx::result result = txn.exec("SELECT * FROM data_science_II");

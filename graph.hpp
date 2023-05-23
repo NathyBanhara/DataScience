@@ -12,6 +12,7 @@ struct Edge
 {
     string value;
     string type;
+    bool read = 0;
     Edge *next;
 };
 
