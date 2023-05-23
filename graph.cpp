@@ -45,6 +45,7 @@ Edge *createEdge(string nameEdge, string type)
     Edge *e = new Edge;
     e->type = type;
     e->value = nameEdge;
+    e->read = false;
     e->next = NULL;
 
     return e;

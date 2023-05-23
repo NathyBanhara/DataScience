@@ -49,15 +49,24 @@ int main()
     {
         postgres.dropTable("data_science_ii");
     
-        string columns = "id SERIAL PRIMARY KEY";
+        string columns = "";
+        
+        bool firstCol = 1;
 
         for (auto x : g.listNodes)
         {
-            if (x.second->name != "id")
+            if (firstCol)
             {
-                columns += ", " + x.second->name + " ";
-                if (x.second->next->type == "string") columns += "varchar(50)";
-                else columns += x.second->next->type;
+                if (x.second->name == "id") columns += "id SERIAL PRIMARY KEY";
+                else if (x.second->next->type == "string") columns += x.second->name + " " + "varchar(50)";
+                else columns += x.second->name + " " + x.second->next->type;
+                firstCol = 0;
+            }
+            else
+            {
+                if (x.second->name == "id") columns += ", id SERIAL PRIMARY KEY";
+                else if (x.second->next->type == "string") columns += ", " + x.second->name + " " + "varchar(50)";
+                else columns += ", " + x.second->name + " " + x.second->next->type;
             }
         }
 
@@ -82,34 +91,42 @@ int main()
         }
     }
 
-    for (auto x : g.listNodes)
+    bool valuesFound = false;
+
+    while (true)
     {
-        Edge *aux = x.second->next;
-        while (aux != NULL)
+        for (auto x : g.listNodes)
         {
-            if (x.second->next->read == 0)
+            Edge *aux = x.second->next;
+            while (aux != NULL)
             {
-                if (firstVal)
+                if (!aux->read)
                 {
-                    values += "'" + x.second->next->value + "'";
-                    firstVal = 0;
+                    if (firstVal)
+                    {
+                        values += "'" + aux->value + "'";
+                        firstVal = 0;
+                    }
+                    else values += ", '" + aux->value + "'";
+                    aux->read = true;
+                    valuesFound = true;
+                    break;
                 }
-                else values += ", '" + x.second->next->value + "'";
-                break;
+                aux = aux->next;
             }
         }
+        if (!valuesFound) break;
+        valuesFound = false;
+
+        postgres.insertData("data_science_ii", columns, values);
 
         firstVal = 1;
-
-        std::string tableName = "data_science_ii";
-        //std::string columns = "column1, column2";
-        std::string values = "'value1', 'value2'";
-        if (postgresql.insertData(tableName, columns, values)) {
-            std::cout << "Dados inseridos com sucesso!" << std::endl;
-        } else {
-            std::cout << "Falha ao inserir dados." << std::endl;
-        }
+        values = "";
     }
+
+    
+
+
     postgres.disconnect();
 
     return 0;
