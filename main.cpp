@@ -6,6 +6,7 @@
 #include "json.hpp"
 #include "queue.hpp"
 #include "graph.hpp"
+#include "graphLog.hpp"
 #include "sax_event_consumer.hpp"
 #include "postgres.hpp"
 
@@ -124,10 +125,13 @@ int main()
         values = "";
     }
 
-    
-
-
     postgres.disconnect();
+
+    GraphLog gLog = GraphLog();
+
+    gLog.getAtt();
+
+    gLog.printGraph();
 
     return 0;
 }

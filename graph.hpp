@@ -29,13 +29,9 @@ class Graph
         unordered_map<string, Node*> listNodes;
 
         void getAtt(string name, string type, string parent, Queue q);
-        void insertNode(string name, string type);
-        void insertEdgeArray(string nameNode, string nameEdge, string type);
-        void insertEdge(string node, string nameEdge, string type);
-        int findNodeIndex(string name, string type);
-        void percentualEdge();
         void printGraph();
-        void printTypes();
+        void insertNode(string name, string type);
+        void insertEdge(string node, string nameEdge, string type);
         void freeGraph();
 };
 
