@@ -53,14 +53,12 @@ void Operations::insertTable()
         if (isFirstCol)
         {
             if (x.second->name == "id") columns += "id SERIAL PRIMARY KEY";
-            else if (x.second->next->type == "string") columns += x.second->name + " " + "varchar(50)";
             else columns += x.second->name + " " + x.second->next->type;
             isFirstCol = 0;
         }
         else
         {
             if (x.second->name == "id") columns += ", id SERIAL PRIMARY KEY";
-            else if (x.second->next->type == "string") columns += ", " + x.second->name + " " + "varchar(50)";
             else columns += ", " + x.second->name + " " + x.second->next->type;
         }
     }

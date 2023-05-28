@@ -7,7 +7,6 @@ using json = nlohmann::json;
 
 bool sax_event_consumer::null()
 {
-    this->queue.push(queue.createStruct("null", "null"));
     return true;
 }
  
@@ -31,13 +30,13 @@ bool sax_event_consumer::number_unsigned(number_unsigned_t val)
 
 bool sax_event_consumer::number_float(number_float_t val, const string_t& s)
 {
-    this->queue.push(queue.createStruct(to_string(val), "double"));
+    this->queue.push(queue.createStruct(to_string(val), "real"));
     return true;
 }
  
 bool sax_event_consumer::string(string_t& val)
 {
-    this->queue.push(queue.createStruct(val, "string"));
+    this->queue.push(queue.createStruct(val, "varchar(50)"));
     return true;
 }
 
