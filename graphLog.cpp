@@ -226,4 +226,5 @@ void GraphLog::printGraph()
 void GraphLog::freeGraph()
 {
     listNodes.clear();
+    operations.clear();
 }
