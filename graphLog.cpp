@@ -3,6 +3,7 @@
 #include <queue>
 #include <string>
 #include <fstream>
+#include "postgres.hpp"
 
 using namespace std;
 
@@ -95,11 +96,11 @@ void GraphLog::getAtt()
                         i++;
                         end = true;
                     }
-                    //<T1,1,A,20,2000>
                 }
                 i++;
                 if (end) break;
             }
+            operations.push_back(name);
             insertEdge(name, stoi(id), column, oldValue, newValue);
         }
         q.pop();
@@ -132,7 +133,8 @@ std::queue<string> GraphLog::readLog()
 NodeLog *createNode (string name)
 {
     NodeLog *newOne = new NodeLog;
-    newOne->next = NULL;
+    newOne->first = NULL;
+    newOne->last = NULL;
     newOne->name = name;
     newOne->commited = false;
 
@@ -155,6 +157,7 @@ EdgeLog *createEdge(int id, string column, string oldValue, string newValue)
     e->oldValue = oldValue;
     e->newValue = newValue;
     e->next = NULL;
+    e->prev = NULL;
 
     return e;
 }
@@ -163,25 +166,42 @@ void GraphLog::insertEdge(string node, int id, string column, string oldValue, s
 {   
     unordered_map<string, NodeLog*>::const_iterator got = listNodes.find(node);
 
-    if (got->second->next == NULL) //if the list of edges is null
+    if (got->second->first == NULL) //if the list of edges is null
     {
         EdgeLog *e = createEdge(id, column, oldValue, newValue);
-        got->second->next = e;
+        got->second->first = e;
+        got->second->last = e;
         return;
     }
     else
     {
-        for (EdgeLog *aux = got->second->next; aux != NULL; aux = aux->next)
+        for (EdgeLog *aux = got->second->first; aux != NULL; aux = aux->next)
         {
             if (aux->next == NULL)
             {
                 EdgeLog *e = createEdge(id, column, oldValue, newValue);
                 e->next = NULL;
+                e->prev = aux;
                 aux->next = e;
+                got->second->last = e;
                 return;
             }
         }
     }
+}
+
+void GraphLog::removeREDO(string node)
+{
+    EdgeLog *aux = listNodes[node]->first;
+    listNodes[node]->first = listNodes[node]->first->next;
+    free(aux);
+}
+
+void GraphLog::removeUNDO(string node)
+{
+    EdgeLog *aux = listNodes[node]->last;
+    listNodes[node]->last = listNodes[node]->last->prev;
+    free(aux);
 }
 
 void GraphLog::printGraph()
@@ -190,7 +210,7 @@ void GraphLog::printGraph()
     {
         cout << x.first;
         cout << " -> " << x.second->commited << ": ";
-        EdgeLog *aux = x.second->next;
+        EdgeLog *aux = x.second->first;
         while (aux != NULL)
         {
             cout << " -> " << aux->column << " -> " << aux->id << " -> " << aux->oldValue << " -> " << aux->newValue << "\n";
@@ -199,6 +219,8 @@ void GraphLog::printGraph()
         
         cout << "\n";
     }
+
+    for (auto x : operations) cout << x << "\n";
 }
 
 void GraphLog::freeGraph()

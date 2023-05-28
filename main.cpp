@@ -33,16 +33,10 @@ int main()
 
     Queue q = sec.queue;
 
-    q.printQueue();
-
-    printf("\n");
-
     Graph g = Graph();
 
 	while (q.front()->name != "end_object")
 		g.getAtt(q.front()->name, q.front()->type, " ", q);
-
-    g.printGraph();
 
     Postgres postgres;
 
@@ -125,13 +119,67 @@ int main()
         values = "";
     }
 
-    postgres.disconnect();
-
     GraphLog gLog = GraphLog();
 
     gLog.getAtt();
 
-    gLog.printGraph();
+    for (auto x : gLog.listNodes)
+    {
+        if (x.second->commited)
+            cout << x.first << " realizou REDO" << "\n";
+        else cout << x.first << " realizou UNDO" << "\n";
+    }
+
+    printf("\n");
+
+    for (auto x : gLog.operations) //REDO
+    {
+        if (gLog.listNodes[x]->commited)
+        {
+            string where = "id = '" + to_string(gLog.listNodes[x]->first->id) + "'";
+            pqxx::result result = postgres.selectData("data_science_ii",
+            gLog.listNodes[x]->first->column, where);
+
+            for (const auto& row : result) {
+                for (const auto& field : row) {
+                    if (field.c_str() != gLog.listNodes[x]->first->newValue)
+                    {
+                        string set = gLog.listNodes[x]->first->column + " = " + gLog.listNodes[x]->first->newValue;
+                            postgres.updateData("data_science_ii", set, where);
+                        cout << gLog.listNodes[x]->first->column 
+                        + " updated to " + gLog.listNodes[x]->first->newValue + " -> REDO" + "\n";
+                    }
+                }
+            }
+            gLog.removeREDO(x);
+        }
+    }
+
+    for (int i = gLog.operations.size()-1; i >= 0; i--)
+    {
+        if (!gLog.listNodes[gLog.operations[i]]->commited)
+        {
+            string where = "id = " + to_string(gLog.listNodes[gLog.operations[i]]->last->id);
+            pqxx::result result = postgres.selectData("data_science_ii",
+            gLog.listNodes[gLog.operations[i]]->last->column, where);
+
+            for (const auto& row : result) {
+                for (const auto& field : row) {
+                    if (field.c_str() != gLog.listNodes[gLog.operations[i]]->last->oldValue)
+                    {
+                        string set = gLog.listNodes[gLog.operations[i]]->last->column + " = " 
+                        + gLog.listNodes[gLog.operations[i]]->last->oldValue;
+                        postgres.updateData("data_science_ii", set, where);
+                        cout << gLog.listNodes[gLog.operations[i]]->last->column + " updated to "
+                         + gLog.listNodes[gLog.operations[i]]->last->oldValue + " -> UNDO" + "\n";
+                    }
+                }
+            }
+            gLog.removeUNDO(gLog.operations[i]);
+        }
+    }
+
+    postgres.disconnect();
 
     return 0;
 }

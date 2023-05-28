@@ -84,3 +84,17 @@ bool Postgres::updateData(const std::string& tableName, const std::string& setCl
         return false;
     }
 }
+
+pqxx::result Postgres::selectData(const std::string& tableName, const std::string& columns,
+                                    const std::string& whereClause) {
+    try {
+        pqxx::work txn(*connection);
+        std::string query = "SELECT " + columns + " FROM " + tableName + " WHERE " + whereClause;
+        pqxx::result result = txn.exec(query);
+        txn.commit();
+        return result;
+    } catch (const std::exception& e) {
+        std::cerr << "Select failed: " << e.what() << std::endl;
+        return pqxx::result();
+    }
+}

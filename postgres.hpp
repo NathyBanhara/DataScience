@@ -25,7 +25,7 @@ public:
                     const std::string& whereClause);
 
     pqxx::result selectData(const std::string& tableName, const std::string& columns,
-                            const std::string& whereClause);
+                                    const std::string& whereClause);
 
 private:
     pqxx::connection* connection;

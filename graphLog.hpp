@@ -15,24 +15,29 @@ struct EdgeLog
     string oldValue;
     string newValue;
     EdgeLog *next;
+    EdgeLog *prev;
 };
 
 struct NodeLog
 {
     string name;
     bool commited;
-    EdgeLog *next;
+    EdgeLog *first;
+    EdgeLog *last;
 };
 
 class GraphLog
 {
     public:
         unordered_map<string, NodeLog*> listNodes;
+        vector<string> operations;
 
         void getAtt();
         std::queue<string> readLog();
         void insertNode(string name);
         void insertEdge(string node, int id, string column, string oldValue, string newValue);
+        void removeREDO(string node);
+        void removeUNDO(string node);
         void printGraph();
         void freeGraph();
 };
